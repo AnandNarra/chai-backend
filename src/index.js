@@ -1,16 +1,28 @@
 //require('dotenv').config({ path : './env' }) old way of writing this syntax
 
 import dotenv from 'dotenv'
-import connectDB from "./db/index.js";
+import connectDB from "./db/connectDB.js";
+
+dotenv.config( 
+    {
+        path : './env'
+    } )
 
 
-dotenv.config({
-    path : './env'
+import express from 'express'
+const app = express()
+
+
+connectDB().then( () =>{
+    app.listen(process.env.PORT || 8000 , () =>{
+        console.log(` Server is running at port : ${process.env.PORT}`);
+        
+    })
 })
-
-
-
-connectDB();
+.catch((err) => {
+    console.log("MongoDB connection failed !!! and check the server path also " , err);
+    
+})
 
 
 
