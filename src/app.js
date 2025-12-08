@@ -4,25 +4,28 @@ import cookieParser from 'cookie-parser'
 
 const app = express()
 
+// CORS configuration
 app.use(cors({
-    origin : process.env.CORS_ORIGIN,
+    origin: process.env.CORS_ORIGIN || "http://localhost:3000", // Default fallback
     credentials: true 
 }))
 
-app.use(express.json({limit: "16kb"}))
-app.use(express.urlencoded({extended:true ,limit: "16kb"}))
+// Body parsing middleware with error handling
+app.use(express.json({ limit: "16kb" }))
+app.use(express.urlencoded({ 
+    extended: true,
+    limit: "16kb"
+}))
+
 app.use(express.static("public"))
 app.use(cookieParser())
 
-
-//routes import
-
+// Routes import
 import userRouter from './routes/user.routes.js'
 
-//routes declaration
+// Routes declaration
+app.use("/api/v1/users", userRouter)
 
-app.use("/api/v1/users" , userRouter)
 
-// http://localhost:8000/api/v1/users/register
 
 export { app }

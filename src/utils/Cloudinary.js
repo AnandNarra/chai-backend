@@ -1,28 +1,52 @@
-import {v2 as cloudinary} from "cloudinary"
-import fs from "fs";
+import { v2 as cloudinary } from 'cloudinary';
+import fs from 'fs';
 
+
+// Cloudinary configuration
 cloudinary.config({
-    cloud_name : process.env.Cloudinary_Name,
-    api_key: process.env.Cloudinary_Api_Key,
-    api_secret: process.env.Cloudinary_Api_Secret
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-const uploadOnCloudinary = async (localFilePath) =>{
+const uploadOnCloudinary = async (localFilePath) => {
     try {
-        if(!localFilePath) return null;
-        const response = await cloudinary.uploader.upload(localFilePath,{
-            resource_type :"auto"
-        })
+        if (!localFilePath) {
+            console.log("No local file path provided");
+            return null;
+        }
 
-        console.log("File is uploaded on Cloudinary " ,response.url);
+        console.log("Uploading file to Cloudinary:", localFilePath);
+
+        // Check if file exists locally
+        if (!fs.existsSync(localFilePath)) {
+            console.log("Local file does not exist:", localFilePath);
+            return null;
+        }
+
+        // Upload the file to Cloudinary
+        const normalizedPath = localFilePath.replace(/\\/g, '/');
+        const response = await cloudinary.uploader.upload(normalizedPath, {
+            resource_type:'auto'
+        });
+
+        // File has been uploaded successfully
+        console.log("File uploaded to Cloudinary successfully:", response.url);
+
+        // Remove file from local storage after upload
         
-        
+
+        return response;
+
     } catch (error) {
-        
-        fs.unlinkSync(localFilePath)
+        console.error("Cloudinary upload error:", error);
 
-        return null
+        // Remove the locally saved temporary file as the upload operation failed
+        if (fs.existsSync(localFilePath)) {
+            fs.unlinkSync(localFilePath);
+        }
+        return null;
     }
 }
 
-export {uploadOnCloudinary}
+export { uploadOnCloudinary };
